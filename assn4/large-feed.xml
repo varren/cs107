@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <title>World: World News, International News, Foreign Reporting - The Washington Post</title>
+      <link>http://feeds.washingtonpost.com/rss/world</link>
+    </item>
+    <item>
+      <title>Los Angeles Times - Top News</title>
+      <link>http://feeds.latimes.com/latimes/news</link>
+    </item>
+    <item>
+      <title>Nation &amp; World - chicagotribune.com</title>
+      <link>http://feeds.chicagotribune.com/chicagotribune/news/nationworld</link>
+    </item>
+    <item>
+      <title>Top Stories - Boston Globe</title>
+      <link>http://feeds.boston.com/boston/topstories</link>
+    </item>
+    <item>
+      <title>National News - New York Post</title>
+      <link>http://www.nypost.com/rss/news.xml</link>
+    </item>
+    <item>
+      <title>Breaking News - Providence Journal</title>
+      <link>http://news.providencejournal.com/breaking-news/index.xml</link>
+    </item>
+    <item>
+      <title>News - Philadelphia Inquirer</title>
+      <link>http://www.philly.com/philly_news.rss</link>
+    </item>
+    <item>
+      <title>News - Raleigh News Observer</title>
+      <link>http://www.newsobserver.com/102/index.rss</link>
+    </item>
+    <item>
+      <title>Latest Top Stories - Miami Herald</title>
+      <link>http://www.miamiherald.com/news/latest-top-stories/index.xml</link>
+    </item>
+    <item>
+      <title>Top News - Columbus Dispatch</title>
+      <link>http://www.dispatch.com/content/syndication/news_national.xml</link>
+    </item>
+    <item>
+      <title>National News - Minneapolis &amp; St. Paul Star Tribune</title>
+      <link>http://www.startribune.com/nation/index.rss2</link>
+    </item>
+    <item>
+      <title>Top Stories - Dallas Morning News</title>
+      <link>http://www.dallasnews.com/?rss&amp;listname=TopStories&amp;rssUpdate</link>
+    </item>
+    <item>
+      <title>National News - San Francisco Chronicle</title>
+      <link>http://www.sfgate.com/rss/feed/National-News-RSS-Feed-435.php</link>
+    </item>
+    <item>
+      <title>Nation &amp; World - Seattle Times</title>
+      <link>http://seattletimes.com/rss/nationworld.xml</link>
+    </item>
+  </channel>
+</rss>

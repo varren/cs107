@@ -1,0 +1,4 @@
+#!/bin/bash
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/tmp/rational.`whoami`/`hostname`/usr/local/lib
+echo Library search path is $LD_LIBRARY_PATH
+./rss-news-search.purify.bin

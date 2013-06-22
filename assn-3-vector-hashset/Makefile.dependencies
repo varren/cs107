@@ -1,0 +1,5 @@
+vector.o: vector.c vector.h bool.h
+hashset.o: hashset.c hashset.h vector.h bool.h
+streamtokenizer.o: streamtokenizer.c streamtokenizer.h bool.h
+vectortest.o: vectortest.c vector.h bool.h
+hashsettest.o: hashsettest.c hashset.h vector.h bool.h

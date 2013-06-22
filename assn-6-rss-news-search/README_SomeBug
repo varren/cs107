@@ -1,0 +1,478 @@
+works fine, fine in gdb, but crushes in valgrind
+
+
+uff@inn:~/cs107/assn-6-rss-news-search$ valgrind ./rss-news-search
+==23680== Memcheck, a memory error detector
+==23680== Copyright (C) 2002-2011, and GNU GPL'd, by Julian Seward et al.
+==23680== Using Valgrind-3.7.0 and LibVEX; rerun with -h for copyright info
+==23680== Command: ./rss-news-search
+==23680==
+Welcome to the CS107 RSS Search Engine!
+This handy tool pulls and processes a huge number of RSS (Rich Site Summary) pages,
+and then allows for a simple search of those documents.  Currently, the application
+operates as a singly threaded application where all feeds are processed sequentially.
+In practice, each one of the feeds would be downloaded in its own thread, as would
+each of the news articles identified by the feeds.
+
+[www.reuters.com] Indexing "Kandinsky painting shoots for record in Christie's London sale"
+[www.reuters.com] Indexing "Viennese artist and convicted pedophile Otto Muehl dies"
+[www.reuters.com] Indexing "Brazil's Portinari tops Christie's Latin American art sale"
+[www.reuters.com] Indexing "Venice Biennale seeks to capture the "unruly" world of art"
+[www.reuters.com] Indexing "Mystery and science fiction author Jack Vance dead at 96"
+[www.reuters.com] Indexing "Giant garbage patches of the sea become "national" art in Venice"
+[www.reuters.com] Indexing "Record unemployment, low inflation underline Europe's pain"
+[www.reuters.com] Indexing "Mitsubishi denies report of Renault partnership"
+[www.reuters.com] Indexing "Banks said to lend China's Shuanghui $7 billion for Smithfield deal"
+[www.reuters.com] Indexing "Toyota says 'good chance' of record Lexus sales this year"
+[www.reuters.com] Indexing "Artist Kapoor draws on Berlin's dark history in new show"
+[www.reuters.com] Indexing "Frankfurt 'Blockupy' protesters surround ECB"
+
+[www.reuters.com] Indexing "Renault says held Mitsubishi cooperation talks in past"
+[www.reuters.com] Indexing "Banks in the dark over $15 billion of promised Rosneft M&A business"
+[www.reuters.com] Indexing "Apple joins other foreign brands in raising prices in Japan"
+[www.reuters.com] Indexing "Euro shares slide, dollar climbs off three-week low"
+[www.reuters.com] Indexing "48 hours in Rochester, New York"
+[www.reuters.com] Indexing "Power regulator's JPMorgan case could be on summer simmer"
+[www.reuters.com] Indexing "TUI Travel picks Boeing for 60-plane order worth $6 billion"
+[www.reuters.com] Indexing "Insight: How Treasury's tax loophole mistake saves companies billions each year"
+[www.reuters.com] Indexing "Filling up on petrol station offices"
+[www.reuters.com] Indexing "Lawmakers hover as more homeowners rent rooms to visitors"
+[www.reuters.com] Indexing "Bumi confident on Bakrie split as seeks lost cash"
+[www.reuters.com] Indexing "Rare "Harry Potter" first edition fetches record auction price"
+[www.reuters.com] Indexing "Japan deflation ebbs, output up; Bank of Japan target still elusive"
+[www.reuters.com] Indexing "REFILE-RESEARCH ALERT-QR Energy: JP Morgan cuts to neutral - Benzinga.com"
+[www.reuters.com] Indexing "Britain's Tate museum sets $34 million record for Constable painting"
+[www.reuters.com] Indexing "AMF experts reject LVMH bid to thwart Hermes inquiry"
+[www.reuters.com] Indexing "Futures drop, but on track for seventh month of gains"
+[www.reuters.com] Indexing "AIG says did not receive deposit payment on ILFC sale"
+[www.reuters.com] Indexing "BlackBerry plans security feature for Android, iPhone"
+[www.reuters.com] Indexing "Update-Moody's upgrades SPCM's ratings to Ba2; positive outlook"
+[www.reuters.com] Indexing "Banks in the dark over $15 bln of promised Rosneft M&A business"
+[www.reuters.com] Indexing "U.S. appeals court revives lawsuit vs United Airlines over wheelchair"
+[www.reuters.com] Indexing "Australia investigating Volkswagen safety after driver death"
+[www.reuters.com] Indexing "UPDATE 1-Repsol does not want seized YPF stake returned"
+[www.reuters.com] Indexing "TUI Travel to buy 60 new Boeing aircraft worth $6 billion"
+[www.reuters.com] Indexing "South Korea's Samsung Techwin wins $537 million order from General Electric"
+[www.reuters.com] Indexing "UPDATE 1-American Realty Capital Properties to buy $807 mln GE Capital portfolio"
+[www.reuters.com] Indexing "European shares dip, still poised for 12th consecutive monthly gain"
+[www.reuters.com] Indexing "RPT-U.S. discovery of rogue GMO wheat raises concerns over controls"
+[www.reuters.com] Indexing "US STOCKS-Futures lower, but on track for seventh month of gains"
+[www.reuters.com] Indexing "US power regulator's JPMorgan case could be on summer simmer"
+[www.reuters.com] Indexing "Florida governor orders review of election laws after voting snafus"
+[www.reuters.com] Indexing "As tallying goes on, top Florida Democrat cheers Obama's win"
+[www.reuters.com] Indexing "UPDATE 1-Dell urges shareholders to vote for CEO's offer"
+[www.reuters.com] Indexing "Dell urges shareholders to vote for CEO's offer"
+[www.reuters.com] Indexing "Analysis: Dividend stocks lose shine as U.S. bond yields rise"
+[www.reuters.com] Indexing "Norway's Arctic idyll shivers at oil plans"
+[www.reuters.com] Indexing "COLUMN-Ways to hedge your bets in the bond market smackdown"
+[www.reuters.com] Indexing "P&G to regroup products into four sectors - WSJ"
+[www.reuters.com] Indexing "EU backs Celgene, Aegerion drugs; sees no Lantus cancer risk"
+[www.reuters.com] Indexing "Senate leader McConnell a big loser on Election Day"
+[www.reuters.com] Indexing "EMERGING MARKETS-Shares suffer largest monthly loss in a year"
+[www.reuters.com] Indexing "UPDATE 2-Banks said to lend China's Shuanghui $7 bln for Smithfield deal"
+[www.reuters.com] Indexing "Dish puts Sprint bid for Clearwire under pressure"
+[www.reuters.com] Indexing "Election system needs an overhaul, but it's not that easy"
+[www.reuters.com] Indexing "London keeps global edge as top transport finance hub"
+[www.reuters.com] Indexing "Carnival puts cruise fleet under microscope after ship fire"
+[www.reuters.com] Indexing "Fiat reassures Italy on jobs as Chrysler merger looms"
+[www.reuters.com] Indexing "UPDATE 1-Fiat reassures Italy on jobs as Chrysler merger looms"
+[www.reuters.com] Indexing "Bruised by Romney criticism, Bain Capital thanks investors"
+[www.reuters.com] Indexing "Brazil Votorantim Cimentos seeks to raise up to $4.9 billion in IPO"
+[www.reuters.com] Indexing "Freeport Indonesia denies latest accident due to mine tunnel collapse"
+[www.reuters.com] Indexing "Boehner: "Obamacare is law of the land""
+==23680== Thread 71:
+==23680== Invalid read of size 4
+==23680==    at 0x804AAC9: ArticleIndexCompare (rss-news-search.c:1144)
+==23680==    by 0x804B0FF: lsearch (vector.c:120)
+==23680==    by 0x804B199: VectorSearch (vector.c:131)
+==23680==    by 0x804A459: AddWordToIndices (rss-news-search.c:794)
+==23680==    by 0x804A2C9: ScanArticle (rss-news-search.c:737)
+==23680==    by 0x804A0BC: ParseArticle (rss-news-search.c:677)
+==23680==    by 0x804A182: ParseArticle (rss-news-search.c:695)
+==23680==    by 0x8049D66: PthreadParseArticle (rss-news-search.c:598)
+==23680==    by 0x4077D4B: start_thread (pthread_create.c:308)
+==23680==    by 0x417ADDD: clone (clone.S:130)
+==23680==  Address 0x468ee48 is 128 bytes inside a block of size 512 free'd
+==23680==    at 0x402BF52: realloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23680==    by 0x804ADBE: VectorExpand (vector.c:61)
+==23680==    by 0x804AE76: VectorInsert (vector.c:73)
+==23680==    by 0x804AF36: VectorAppend (vector.c:84)
+==23680==    by 0x804A477: AddWordToIndices (rss-news-search.c:797)
+==23680==    by 0x804A2C9: ScanArticle (rss-news-search.c:737)
+==23680==    by 0x804A0BC: ParseArticle (rss-news-search.c:677)
+==23680==    by 0x804A182: ParseArticle (rss-news-search.c:695)
+==23680==    by 0x8049D66: PthreadParseArticle (rss-news-search.c:598)
+==23680==    by 0x4077D4B: start_thread (pthread_create.c:308)
+==23680==    by 0x417ADDD: clone (clone.S:130)
+==23680==
+[www.reuters.com] Indexing "New Gold to acquire exploration company Rainy River"
+rss-news-search: vector.c:46: VectorNth: Assertion `(position >= 0) && (position < v->logicalLength)' failed.
+[www.reuters.com] Indexing "New Gold to acquire exploration company Rainy River"
+==23680==
+==23680== HEAP SUMMARY:
+==23680==     in use at exit: 1,372,859 bytes in 25,905 blocks
+==23680==   total heap usage: 34,110 allocs, 8,205 frees, 2,978,960 bytes allocated
+==23680==
+==23680== LEAK SUMMARY:
+==23680==    definitely lost: 0 bytes in 0 blocks
+==23680==    indirectly lost: 0 bytes in 0 blocks
+==23680==      possibly lost: 9,656 bytes in 71 blocks
+==23680==    still reachable: 1,363,203 bytes in 25,834 blocks
+==23680==         suppressed: 0 bytes in 0 blocks
+==23680== Rerun with --leak-check=full to see details of leaked memory
+==23680==
+==23680== For counts of detected and suppressed errors, rerun with: -v
+==23680== ERROR SUMMARY: 46 errors from 1 contexts (suppressed: 0 from 0)
+Killed
+
+uff@inn:~/cs107/assn-6-rss-news-search$ ./rss-news-search
+Welcome to the CS107 RSS Search Engine!
+This handy tool pulls and processes a huge number of RSS (Rich Site Summary) pages,
+and then allows for a simple search of those documents.  Currently, the application
+operates as a singly threaded application where all feeds are processed sequentially.
+In practice, each one of the feeds would be downloaded in its own thread, as would
+each of the news articles identified by the feeds.
+
+[www.reuters.com] Indexing "Kandinsky painting shoots for record in Christie's London sale"
+[www.reuters.com] Indexing "Brazil's Portinari tops Christie's Latin American art sale"
+[www.reuters.com] Indexing "Venice Biennale seeks to capture the "unruly" world of art"
+[www.reuters.com] Indexing "Britain's Tate museum sets $34 million record for Constable painting"
+[www.reuters.com] Indexing "China's Ai Weiwei launches musical career with heavy metal "Dumbass" single"
+[www.reuters.com] Indexing "Giant garbage patches of the sea become "national" art in Venice"
+[www.reuters.com] Indexing "Rare "Harry Potter" first edition fetches record auction price"
+
+[www.reuters.com] Indexing "Artist Kapoor draws on Berlin's dark history in new show"
+[www.reuters.com] Indexing "Mystery and science fiction author Jack Vance dead at 96"
+[www.reuters.com] Indexing "After pigeons, "chicks" battle French entrepreneur rules"
+[www.reuters.com] Indexing "BlackBerry plans security feature for Android, iPhone"
+[www.reuters.com] Indexing "Banks in the dark over $15 billion of promised Rosneft M&A business"
+[www.reuters.com] Indexing "Filling up on petrol station offices"
+[www.reuters.com] Indexing "Norway's Arctic idyll shivers at oil plans"
+[www.reuters.com] Indexing "Consumer spending falls, inflation subdued"
+[www.reuters.com] Indexing "Toyota says 'good chance' of record Lexus sales this year"
+[www.reuters.com] Indexing "Futures drop, but on track for seventh month of gains"
+[www.reuters.com] Indexing "Fiat reassures Italy on jobs as Chrysler merger looms"
+[www.reuters.com] Indexing "Bumi confident on Bakrie split as seeks lost cash"
+[www.reuters.com] Indexing "Apple joins other foreign brands in raising prices in Japan"
+[www.reuters.com] Indexing "Renault says held Mitsubishi cooperation talks in past"
+[www.reuters.com] Indexing "TUI Travel picks Boeing for 60-plane order worth $6 billion"
+[www.reuters.com] Indexing "Dell urges shareholders to vote for CEO's offer"
+[www.reuters.com] Indexing "Power regulator's JPMorgan case could be on summer simmer"
+[www.reuters.com] Indexing "Euro shares slide, dollar climbs off three-week low"
+[www.reuters.com] Indexing "Analysis: QE talk spurs caution in Asian markets, yet money stays"
+[www.reuters.com] Indexing "Dish puts Sprint bid for Clearwire under pressure"
+[www.reuters.com] Indexing "TUI Travel to buy 60 new Boeing aircraft worth $6 billion"
+[www.reuters.com] Indexing "Lawmakers hover as more homeowners rent rooms to visitors"
+[www.reuters.com] Indexing "London keeps global edge as top transport finance hub"
+[www.reuters.com] Indexing "EMERGING MARKETS-Shares suffer largest monthly loss in a year"
+[www.reuters.com] Indexing "South Korea's Samsung Techwin wins $537 million order from General Electric"
+[www.reuters.com] Indexing "Element Financial to buy GE Capital's Canadian fleet portfolio for C$570 mln"
+[www.reuters.com] Indexing "RPT-USDA goes sleuthing to crack biotech wheat mystery"
+[www.reuters.com] Indexing "European shares dip, still poised for 12th consecutive monthly gain"
+[www.reuters.com] Indexing "Bruised by Romney criticism, Bain Capital thanks investors"
+[www.reuters.com] Indexing "INSIGHT-Libya becomes "the new Mali" as Islamists shift in Sahara"
+[www.reuters.com] Indexing "Election blurring of church, state separation draws complaints"
+[www.reuters.com] Indexing "Hit political blogger Nate Silver on future of predictive modeling"
+[www.reuters.com] Indexing "Election system needs an overhaul, but it's not that easy"
+[www.reuters.com] Indexing "EU backs Celgene, Aegerion drugs; sees no Lantus cancer risk"
+[www.reuters.com] Indexing "DIARY-NON S&P WEEK AHEAD"
+[www.reuters.com] Indexing "Record unemployment, low inflation underline Europe's pain"
+[www.reuters.com] Indexing "Banks said to lend China's Shuanghui $7 billion for Smithfield deal"
+[www.reuters.com] Indexing "AIG says did not receive deposit payment on ILFC sale"
+[www.reuters.com] Indexing "REFILE-RESEARCH ALERT-QR Energy: JP Morgan cuts to neutral - Benzinga.com"
+[www.reuters.com] Indexing "COLUMN-Ways to hedge your bets in the bond market smackdown"
+[www.reuters.com] Indexing "US STOCKS-Futures drop, but on track for seventh month of gains"
+[www.reuters.com] Indexing "Carnival puts cruise fleet under microscope after ship fire"
+[www.reuters.com] Indexing "New Gold to acquire exploration company Rainy River"
+[www.reuters.com] Indexing "Exiled Russian economist re-elected to Sberbank board"
+[www.reuters.com] Indexing "Obama, buoyed by election win, faces new battles"
+[www.reuters.com] Indexing "RPT-U.S. discovery of rogue GMO wheat raises concerns over controls"
+[www.reuters.com] Indexing "Florida governor orders review of election laws after voting snafus"
+[www.reuters.com] Indexing "Analysis: Dividend stocks lose shine as U.S. bond yields rise"
+[www.reuters.com] Indexing "Australia investigating Volkswagen safety after driver death"
+[www.reuters.com] Indexing "Frankfurt 'Blockupy' protesters surround ECB"
+[www.reuters.com] Indexing "48 hours in Rochester, New York"
+[www.reuters.com] Indexing "Top 10 stopover stays"
+[www.reuters.com] Indexing "GLOBAL MARKETS-Euro shares slide, dollar climbs off three-week low"
+[www.reuters.com] Indexing "UPDATE 1-Repsol does not want seized YPF stake returned"
+[www.reuters.com] Indexing "U.S. appeals court revives lawsuit vs United Airlines over wheelchair"
+[www.reuters.com] Indexing "Viennese artist and convicted pedophile Otto Muehl dies"
+[www.reuters.com] Indexing "Senate leader McConnell a big loser on Election Day"
+[www.reuters.com] Indexing "P&G to regroup products into four sectors - WSJ"
+[www.reuters.com] Indexing "Update-Moody's upgrades SPCM's ratings to Ba2; positive outlook"
+[www.reuters.com] Indexing "Mitsubishi denies report of Renault partnership"
+[www.reuters.com] Indexing "White House lists two dozen leaders to meet with Obama on deficit"
+[www.reuters.com] Indexing "UPDATE 1-Dell urges shareholders to vote for CEO's offer"
+[www.reuters.com] Indexing "UPDATE 1-Fiat reassures Italy on jobs as Chrysler merger looms"
+[www.reuters.com] Indexing "US STOCKS-Futures lower, but on track for seventh month of gains"
+[www.reuters.com] Indexing "US power regulator's JPMorgan case could be on summer simmer"
+[www.reuters.com] Indexing "As tallying goes on, top Florida Democrat cheers Obama's win"
+[www.reuters.com] Indexing "Boehner: "Obamacare is law of the land""
+[www.reuters.com] Indexing "UPDATE 1-American Realty Capital Properties to buy $807 mln GE Capital portfolio"
+[www.reuters.com] Indexing "UPDATE 2-Banks said to lend China's Shuanghui $7 bln for Smithfield deal"
+[www.reuters.com] Indexing "Banks in the dark over $15 bln of promised Rosneft M&A business"
+[www.reuters.com] Indexing "AMF experts reject LVMH bid to thwart Hermes inquiry"
+[www.reuters.com] Indexing "Brazil Votorantim Cimentos seeks to raise up to $4.9 billion in IPO"
+Please enter a single query term that might be in our set of indices [enter to quit]:
+
+uff@inn:~/cs107/assn-6-rss-news-search$ gdb ./rss-news-search
+GNU gdb (Ubuntu/Linaro 7.4-2012.04-0ubuntu2.1) 7.4-2012.04
+Copyright (C) 2012 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "i686-linux-gnu".
+For bug reporting instructions, please see:
+<http://bugs.launchpad.net/gdb-linaro/>...
+Reading symbols from /home/uff/cs107/assn-6-rss-news-search/rss-news-search...done.
+(gdb) run
+Starting program: /home/uff/cs107/assn-6-rss-news-search/rss-news-search
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/i386-linux-gnu/libthread_db.so.1".
+Welcome to the CS107 RSS Search Engine!
+This handy tool pulls and processes a huge number of RSS (Rich Site Summary) pages,
+and then allows for a simple search of those documents.  Currently, the application
+operates as a singly threaded application where all feeds are processed sequentially.
+In practice, each one of the feeds would be downloaded in its own thread, as would
+each of the news articles identified by the feeds.
+
+[New Thread 0xb7d6db40 (LWP 23847)]
+[New Thread 0xb756cb40 (LWP 23848)]
+[New Thread 0xb6bffb40 (LWP 23849)]
+[New Thread 0xb61ffb40 (LWP 23850)]
+[New Thread 0xb59feb40 (LWP 23851)]
+[New Thread 0xb51fdb40 (LWP 23852)]
+[New Thread 0xb49fcb40 (LWP 23853)]
+[New Thread 0xb41fbb40 (LWP 23854)]
+[New Thread 0xb39fab40 (LWP 23855)]
+[New Thread 0xb31f9b40 (LWP 23856)]
+[New Thread 0xb29f8b40 (LWP 23857)]
+[New Thread 0xb21f7b40 (LWP 23858)]
+[New Thread 0xb19f6b40 (LWP 23859)]
+[New Thread 0xb11f5b40 (LWP 23860)]
+[New Thread 0xb09f4b40 (LWP 23861)]
+[New Thread 0xb01f3b40 (LWP 23862)]
+[New Thread 0xaf9f2b40 (LWP 23863)]
+[New Thread 0xaf1f1b40 (LWP 23864)]
+[New Thread 0xae9f0b40 (LWP 23865)]
+[New Thread 0xae1efb40 (LWP 23866)]
+[New Thread 0xad9eeb40 (LWP 23867)]
+[New Thread 0xad1edb40 (LWP 23868)]
+[New Thread 0xac9ecb40 (LWP 23869)]
+[New Thread 0xac1ebb40 (LWP 23870)]
+[New Thread 0xab9eab40 (LWP 23871)]
+[www.reuters.com] Indexing "Kandinsky painting shoots for record in Christie's London sale"
+[www.reuters.com] Indexing "Giant garbage patches of the sea become "national" art in Venice"
+[www.reuters.com] Indexing "Mystery and science fiction author Jack Vance dead at 96"
+[www.reuters.com] Indexing "Viennese artist and convicted pedophile Otto Muehl dies"
+[New Thread 0xab1e9b40 (LWP 23872)]
+[New Thread 0xaa9e8b40 (LWP 23873)]
+[New Thread 0xaa1e7b40 (LWP 23874)]
+[New Thread 0xa99e6b40 (LWP 23875)]
+[New Thread 0xa91e5b40 (LWP 23876)]
+[www.reuters.com] Indexing "Brazil's Portinari tops Christie's Latin American art sale"
+[New Thread 0xa89e4b40 (LWP 23877)]
+[www.reuters.com] Indexing "Venice Biennale seeks to capture the "unruly" world of art"
+[Thread 0xb6bffb40 (LWP 23849) exited]
+[Thread 0xb59feb40 (LWP 23851) exited]
+[New Thread 0xa81e3b40 (LWP 23878)]
+[www.reuters.com] Indexing "Britain's Tate museum sets $34 million record for Constable painting"
+[www.reuters.com] Indexing "China's Ai Weiwei launches musical career with heavy metal "Dumbass" single"
+[Thread 0xb7d6db40 (LWP 23847) exited]
+[Thread 0xb756cb40 (LWP 23848) exited]
+[New Thread 0xa79e2b40 (LWP 23879)]
+[Thread 0xb61ffb40 (LWP 23850) exited]
+[www.reuters.com] Indexing "Consumer spending falls, inflation subdued"
+[Thread 0xb39fab40 (LWP 23855) exited]
+[New Thread 0xa71e1b40 (LWP 23880)]
+[www.reuters.com] Indexing "After pigeons, 'chicks' battle French entrepreneur rules"
+[Thread 0xb31f9b40 (LWP 23856) exited]
+[New Thread 0xa69e0b40 (LWP 23881)]
+[www.reuters.com] Indexing "Rare "Harry Potter" first edition fetches record auction price"
+[Thread 0xb21f7b40 (LWP 23858) exited]
+[www.reuters.com] Indexing "Banks said to lend China's Shuanghui $7 billion for Smithfield deal"
+[www.reuters.com] Indexing "Power regulator's JPMorgan case could be on summer simmer"
+[Thread 0xb29f8b40 (LWP 23857) exited]
+[New Thread 0xa61dfb40 (LWP 23882)]
+[Thread 0xb41fbb40 (LWP 23854) exited]
+[New Thread 0xa59deb40 (LWP 23883)]
+[New Thread 0xa51ddb40 (LWP 23884)]
+[Thread 0xae9f0b40 (LWP 23865) exited]
+[New Thread 0xa49dcb40 (LWP 23885)]
+[www.reuters.com] Indexing "AMF experts reject LVMH bid to thwart Hermes inquiry"
+[Thread 0xb51fdb40 (LWP 23852) exited]
+[New Thread 0xa41dbb40 (LWP 23886)]
+[Thread 0xae1efb40 (LWP 23866) exited]
+[New Thread 0xa39dab40 (LWP 23887)]
+[New Thread 0xa31d9b40 (LWP 23888)]
+[www.reuters.com] Indexing "TUI Travel to buy 60 new Boeing aircraft worth $6 billion"
+[Thread 0xaf1f1b40 (LWP 23864) exited]
+[New Thread 0xa29d8b40 (LWP 23889)]
+[www.reuters.com] Indexing "South Korea's Samsung Techwin wins $537 million order from General Electric"
+[New Thread 0xa21d7b40 (LWP 23890)]
+[www.reuters.com] Indexing "Top 10 stopover stays"
+[www.reuters.com] Indexing "Lawmakers hover as more homeowners rent rooms to visitors"
+[www.reuters.com] Indexing "Frankfurt 'Blockupy' protesters surround ECB"
+[Thread 0xa91e5b40 (LWP 23876) exited]
+[Thread 0xa89e4b40 (LWP 23877) exited]
+[New Thread 0xa19d6b40 (LWP 23891)]
+[Thread 0xa59deb40 (LWP 23883) exited]
+[www.reuters.com] Indexing "BlackBerry plans security feature for Android, iPhone"
+[Thread 0xa61dfb40 (LWP 23882) exited]
+[New Thread 0xa11d5b40 (LWP 23892)]
+[New Thread 0xa09d4b40 (LWP 23893)]
+[New Thread 0xa01d3b40 (LWP 23894)]
+[www.reuters.com] Indexing "Carnival puts cruise fleet under microscope after ship fire"
+[New Thread 0x9f9d2b40 (LWP 23895)]
+[New Thread 0x9f1d1b40 (LWP 23896)]
+[www.reuters.com] Indexing "U.S. appeals court revives lawsuit vs United Airlines over wheelchair"
+[New Thread 0x9e9d0b40 (LWP 23897)]
+[New Thread 0x9e1cfb40 (LWP 23898)]
+[www.reuters.com] Indexing "Norway's Arctic idyll shivers at oil plans"
+[New Thread 0x9d9ceb40 (LWP 23899)]
+[www.reuters.com] Indexing "Filling up on petrol station offices"
+[Thread 0xa49dcb40 (LWP 23885) exited]
+[New Thread 0x9d1cdb40 (LWP 23900)]
+[Thread 0xa29d8b40 (LWP 23889) exited]
+[New Thread 0x9c9ccb40 (LWP 23901)]
+[Thread 0xa21d7b40 (LWP 23890) exited]
+[Thread 0xa31d9b40 (LWP 23888) exited]
+[New Thread 0x9c1cbb40 (LWP 23902)]
+[www.reuters.com] Indexing "London keeps global edge as top transport finance hub"
+[www.reuters.com] Indexing "Analysis: Dividend stocks lose shine as U.S. bond yields rise"
+[Thread 0xa39dab40 (LWP 23887) exited]
+[New Thread 0x9b9cab40 (LWP 23903)]
+[New Thread 0x9b1c9b40 (LWP 23904)]
+[www.reuters.com] Indexing "Dish puts Sprint bid for Clearwire under pressure"
+[www.reuters.com] Indexing "P&G to regroup products into four sectors - WSJ"
+[www.reuters.com] Indexing "Analysis: QE talk spurs caution in Asian markets, yet money stays"
+[Thread 0xa69e0b40 (LWP 23881) exited]
+[New Thread 0x9a9c8b40 (LWP 23905)]
+[Thread 0xa41dbb40 (LWP 23886) exited]
+[Thread 0xa71e1b40 (LWP 23880) exited]
+[New Thread 0x9a1c7b40 (LWP 23906)]
+[Thread 0xa81e3b40 (LWP 23878) exited]
+[New Thread 0x999c6b40 (LWP 23907)]
+[www.reuters.com] Indexing "Australia investigating Volkswagen safety after driver death"
+[Thread 0xa79e2b40 (LWP 23879) exited]
+[www.reuters.com] Indexing "Toyota says 'good chance' of record Lexus sales this year"
+[New Thread 0x991c5b40 (LWP 23908)]
+[New Thread 0x989c4b40 (LWP 23909)]
+[www.reuters.com] Indexing "Bumi confident on Bakrie split as seeks lost cash"
+[New Thread 0x981c3b40 (LWP 23910)]
+[www.reuters.com] Indexing "UPDATE 1-Dell urges shareholders to vote for CEO's offer"
+[New Thread 0x979c2b40 (LWP 23911)]
+[Thread 0xaa9e8b40 (LWP 23873) exited]
+[www.reuters.com] Indexing "UPDATE 1-Fiat reassures Italy on jobs as Chrysler merger looms"
+[Thread 0xac9ecb40 (LWP 23869) exited]
+[New Thread 0x971c1b40 (LWP 23912)]
+[Thread 0xa99e6b40 (LWP 23875) exited]
+[Thread 0x9d9ceb40 (LWP 23899) exited]
+[New Thread 0x969c0b40 (LWP 23913)]
+[www.reuters.com] Indexing "Brazil Votorantim Cimentos seeks to raise up to $4.9 billion in IPO"
+[Thread 0x9e1cfb40 (LWP 23898) exited]
+[New Thread 0x961bfb40 (LWP 23914)]
+[New Thread 0x959beb40 (LWP 23915)]
+[www.reuters.com] Indexing "UPDATE 1-American Realty Capital Properties to buy $807 mln GE Capital portfolio"
+[www.reuters.com] Indexing "Futures drop, but on track for seventh month of gains"
+[www.reuters.com] Indexing "Element Financial to buy GE Capital's Canadian fleet portfolio for C$570 mln"
+[Thread 0x9d1cdb40 (LWP 23900) exited]
+[www.reuters.com] Indexing "US STOCKS-Futures drop, but on track for seventh month of gains"
+[Thread 0xaa1e7b40 (LWP 23874) exited]
+[Thread 0xaf9f2b40 (LWP 23863) exited]
+[Thread 0x9e9d0b40 (LWP 23897) exited]
+[Thread 0x9b1c9b40 (LWP 23904) exited]
+[New Thread 0x951bdb40 (LWP 23916)]
+[New Thread 0x949bcb40 (LWP 23917)]
+[www.reuters.com] Indexing "Exiled Russian economist re-elected to Sberbank board"
+[www.reuters.com] Indexing "COLUMN-Ways to hedge your bets in the bond market smackdown"
+[New Thread 0x941bbb40 (LWP 23918)]
+[www.reuters.com] Indexing "Banks in the dark over $15 bln of promised Rosneft M&A business"
+[www.reuters.com] Indexing "EU backs Celgene, Aegerion drugs; sees no Lantus cancer risk"
+[Thread 0x9b9cab40 (LWP 23903) exited]
+[New Thread 0x939bab40 (LWP 23919)]
+[www.reuters.com] Indexing "Mitsubishi denies report of Renault partnership"
+[New Thread 0x931b9b40 (LWP 23920)]
+[Thread 0x9f1d1b40 (LWP 23896) exited]
+[New Thread 0x929b8b40 (LWP 23921)]
+[Thread 0x9a9c8b40 (LWP 23905) exited]
+[New Thread 0x921b7b40 (LWP 23922)]
+[www.reuters.com] Indexing "US STOCKS-Futures lower, but on track for seventh month of gains"
+[Thread 0x999c6b40 (LWP 23907) exited]
+[New Thread 0x919b6b40 (LWP 23923)]
+[Thread 0xab1e9b40 (LWP 23872) exited]
+[New Thread 0x911b5b40 (LWP 23924)]
+[New Thread 0x909b4b40 (LWP 23925)]
+[www.reuters.com] Indexing "UPDATE 2-Banks said to lend China's Shuanghui $7 bln for Smithfield deal"
+
+[www.reuters.com] Indexing "EMERGING MARKETS-Shares suffer largest monthly loss in a year"
+[Thread 0x979c2b40 (LWP 23911) exited]
+[www.reuters.com] Indexing "White House lists two dozen leaders to meet with Obama on deficit"
+[Thread 0x981c3b40 (LWP 23910) exited]
+[Thread 0x989c4b40 (LWP 23909) exited]
+[www.reuters.com] Indexing "Euro shares slide, dollar climbs off three-week low"
+[Thread 0x951bdb40 (LWP 23916) exited]
+[www.reuters.com] Indexing "Obama, buoyed by election win, faces new battles"
+[Thread 0xab9eab40 (LWP 23871) exited]
+[www.reuters.com] Indexing "Florida governor orders review of election laws after voting snafus"
+[www.reuters.com] Indexing "Senate leader McConnell a big loser on Election Day"
+[Thread 0x931b9b40 (LWP 23920) exited]
+[www.reuters.com] Indexing "INSIGHT-Libya becomes "the new Mali" as Islamists shift in Sahara"
+[Thread 0x941bbb40 (LWP 23918) exited]
+[www.reuters.com] Indexing "Election blurring of church, state separation draws complaints"
+[www.reuters.com] Indexing "Election system needs an overhaul, but it's not that easy"
+[Thread 0x959beb40 (LWP 23915) exited]
+[Thread 0x919b6b40 (LWP 23923) exited]
+[Thread 0x909b4b40 (LWP 23925) exited]
+[www.reuters.com] Indexing "As tallying goes on, top Florida Democrat cheers Obama's win"
+[Thread 0x9c9ccb40 (LWP 23901) exited]
+[www.reuters.com] Indexing "Bruised by Romney criticism, Bain Capital thanks investors"
+[Thread 0x911b5b40 (LWP 23924) exited]
+[www.reuters.com] Indexing "Boehner: "Obamacare is law of the land""
+[www.reuters.com] Indexing "Hit political blogger Nate Silver on future of predictive modeling"
+[Thread 0x921b7b40 (LWP 23922) exited]
+[www.reuters.com] Indexing "US power regulator's JPMorgan case could be on summer simmer"
+[Thread 0x939bab40 (LWP 23919) exited]
+[Thread 0x929b8b40 (LWP 23921) exited]
+[www.reuters.com] Indexing "RPT-U.S. discovery of rogue GMO wheat raises concerns over controls"
+[Thread 0x961bfb40 (LWP 23914) exited]
+[www.reuters.com] Indexing "European shares dip, still poised for 12th consecutive monthly gain"
+[Thread 0x969c0b40 (LWP 23913) exited]
+[www.reuters.com] Indexing "New Gold to acquire exploration company Rainy River"
+[www.reuters.com] Indexing "DIARY-NON S&P WEEK AHEAD"
+[www.reuters.com] Indexing "UPDATE 1-Repsol does not want seized YPF stake returned"
+[Thread 0x991c5b40 (LWP 23908) exited]
+[Thread 0x971c1b40 (LWP 23912) exited]
+[www.reuters.com] Indexing "Update-Moody's upgrades SPCM's ratings to Ba2; positive outlook"
+[Thread 0x9c1cbb40 (LWP 23902) exited]
+[Thread 0x9a1c7b40 (LWP 23906) exited]
+[Thread 0x9f9d2b40 (LWP 23895) exited]
+[www.reuters.com] Indexing "AIG says did not receive deposit payment on ILFC sale"
+[www.reuters.com] Indexing "REFILE-RESEARCH ALERT-QR Energy: JP Morgan cuts to neutral - Benzinga.com"
+[www.reuters.com] Indexing "GLOBAL MARKETS-Euro shares slide, dollar climbs off three-week low"
+[Thread 0xa01d3b40 (LWP 23894) exited]
+[Thread 0xa09d4b40 (LWP 23893) exited]
+[www.reuters.com] Indexing "48 hours in Rochester, New York"
+[Thread 0xa11d5b40 (LWP 23892) exited]
+[Thread 0x949bcb40 (LWP 23917) exited]
+[www.reuters.com] Indexing "TUI Travel picks Boeing for 60-plane order worth $6 billion"
+[www.reuters.com] Indexing "RPT-USDA goes sleuthing to crack biotech wheat mystery"
+[www.reuters.com] Indexing "Apple joins other foreign brands in raising prices in Japan"
+[Thread 0xa51ddb40 (LWP 23884) exited]
+[www.reuters.com] Indexing "Renault says held Mitsubishi cooperation talks in past"
+[www.reuters.com] Indexing "Dell urges shareholders to vote for CEO's offer"
+[Thread 0xac1ebb40 (LWP 23870) exited]
+[Thread 0xa19d6b40 (LWP 23891) exited]
+[Thread 0xad1edb40 (LWP 23868) exited]
+[www.reuters.com] Indexing "Fiat reassures Italy on jobs as Chrysler merger looms"
+[www.reuters.com] Indexing "Banks in the dark over $15 billion of promised Rosneft M&A business"
+[Thread 0xb01f3b40 (LWP 23862) exited]
+[www.reuters.com] Indexing "Record unemployment, low inflation underline Europe's pain"
+[www.reuters.com] Indexing "Artist Kapoor draws on Berlin's dark history in new show"
+[Thread 0xb09f4b40 (LWP 23861) exited]
+[Thread 0xb11f5b40 (LWP 23860) exited]
+[Thread 0xb19f6b40 (LWP 23859) exited]
+[Thread 0xb49fcb40 (LWP 23853) exited]
+[Thread 0xad9eeb40 (LWP 23867) exited]
+Please enter a single query term that might be in our set of indices [enter to quit]:
