@@ -22,7 +22,7 @@ typedef struct {
 
 //general data struct
 typedef struct {
-  rssFeedItem item; //just to keep default data structure
+  rssFeedItem item; //just to keep xml parser data
   hashset stopWords;//strings
   hashset articles; //articleData
   hashset indices;  //strings + vector of wordCounter
@@ -44,6 +44,10 @@ typedef struct{
 }wordCounter;
 
 static void Welcome(const char *welcomeTextURL);
+static void CreateDataStructure(rssFeedData* data);
+static void DisposeData(rssFeedData *data);
+static void LoadStopWords(const char *StopWordsTextURL, hashset* stopWords);
+
 static void BuildIndices(const char *feedsFileURL ,rssFeedData * data);
 static void ProcessFeed(const char *remoteDocumentURL,rssFeedData * data);
 static void PullAllNewsItems(urlconnection *urlconn, rssFeedData * data);
@@ -52,146 +56,37 @@ static void ProcessEndTag(void *userData, const char *name);
 static void ProcessTextData(void *userData, const char *text, int len);
 static void ParseArticle(void *userData);
 static void ScanArticle(streamtokenizer *st, void *userData);
+
+static void indexWord(vector *data,articleData *article);
+static indexData* addWordRecord(hashset *indices, char*someWord);
+static articleData* AddArticle(hashset *articles, rssFeedItem *item);
+
 static void QueryIndices(void* userData);
 static void ProcessResponse(const char *word,void* userData);
 static bool WordIsWellFormed(const char *word);
-static void LoadStopWords(const char *StopWordsTextURL, hashset* stopWords);
 
+static int StringHash(const void *elemAddr, int numBuckets);
+static void StringMap(void*elemAddr,void*auxData);
+static int StringCmp(const void *one,const void *two);
+static void StringFree(void*elemAddr);
+
+static void ArticleMap(void*elemAddr,void*auxData);
+static int ArticleHash(const void *elemAddr, int numBuckets);
+static int ArticleCmp(const void *oneP,const void *twoP);
+static void ArticleFree(void*elemAddr);
+
+static int SortVectorCmpFn(const void *one,const void *two);
+static int FindArticleRecordCmpFn(const void *oneP,const void *twoP);
+static void PrintResultsMapFn(void*elemAddr,void*auxData);
+
+static void IndexMap(void*elemAddr,void*auxData);
+static int IndexHash(const void *elemAddr, int numBuckets);
+static int IndexCmp(const void *oneP,const void *twoP);
+static void IndexFree(void*elemAddr);
 
 static const char *const kWelcomeTextURL ="http://varren.site44.com/welcome.txt";
 static const char *const kDefaultStopWordsURL = "http://varren.site44.com/stop-words.txt";
 static const char *const kDefaultFeedsFileURL = "http://varren.site44.com/rss-feeds.txt";
-
-//STRING HASHSET HELPER FUNCTIONS
-static const signed long kHashMultiplier = -1664117991L;
-static int StringHash(const void *elemAddr, int numBuckets){
-  char* s = *(char**)elemAddr;
-  unsigned long hashcode = 0;
-  for (int i = 0; i < strlen(s); i++)
-    hashcode = hashcode * kHashMultiplier + tolower(s[i]);
-  return hashcode % numBuckets;
-}
-
-static void StringMap(void*elemAddr,void*auxData){
-  printf(":: %s ",*(char**)elemAddr);
-}
-
-static int StringCmp(const void *one,const void *two){
-  return strcasecmp(*(char**)one,*(char**)two);
-}
-
-static void StringFree(void*elemAddr){
-  free(*(char**)elemAddr);
-}
-
-//ARTICLE HASHSET HELPER FUNCTIONS
-static void ArticleMap(void*elemAddr,void*auxData){
-  articleData *data = *(articleData**)elemAddr;  
-  printf("\narticle:: %s\n url:: %s", data->title, data->url);
-  fflush(stdout);
-}
-
-static int ArticleHash(const void *elemAddr, int numBuckets){
-  const articleData *data = *(articleData**)elemAddr;
-  char* title = data->title;
-  return StringHash(&title,numBuckets);
-}
-
-static int ArticleCmp(const void *oneP,const void *twoP){
-  const articleData* one = *(articleData**) oneP;
-  const articleData* two = *(articleData**)twoP; 
-  
-  if(strcasecmp(one->url,two->url)==0 || strcasecmp(one->title,two->title) == 0) 
-    return 0;
-  else
-    return strcasecmp(one->url,two->url);  
-}
-
-static void ArticleFree(void*elemAddr){
-  articleData* data = *(articleData**)elemAddr;
-  free(data->title);
-  free(data->url);
-  free(data);
-}
-
-//WORDCOUNTER VECTOR HEALPER FUNCTIONS
-
-static int SortVectorCmpFn(const void *one,const void *two){
-  const wordCounter* first = one;
-  const wordCounter* second = two;
-  if(first->counter>second->counter)
-    return -1;
-  else if(first->counter< second-> counter)
-    return 1;
-  else 
-    return 0;
-}
-
-static int FindArticleRecordCmpFn(const void *oneP,const void *twoP){
-  const wordCounter* one = oneP;
-  const wordCounter* two = twoP;
-  return ArticleCmp(&one->article,&two->article);
-}
-
-static void PrintResultsMapFn(void*elemAddr,void*auxData){
-  wordCounter *data = elemAddr;
-  printf("\n %d)\t Article:: %s Count:: %d", (*(int*)auxData)++, data->article->title, data->counter); 
-  fflush(stdout);
-}
-//no free function for vector because it has only int and *articles, that will be freed by articles hashset
-
-//INDEX HASHSET HELPER FUNCTIONS
-static void IndexMap(void*elemAddr,void*auxData){
-  indexData *data = elemAddr;  
-  printf("\n word:::::::::::::::::::%s:::::::::::::::::::::::::::::::: ",  data->word);
-  fflush(stdout);
-  int i=0;  
-  VectorMap(&data->data,PrintResultsMapFn,&i);
-}
-
-static int IndexHash(const void *elemAddr, int numBuckets){
-  const indexData *data = elemAddr;
-  return StringHash(&data->word,numBuckets);
-}
-
-static int IndexCmp(const void *oneP,const void *twoP){
-  const indexData* one = oneP;
-  const indexData* two = twoP;
-  return strcasecmp(one->word,two->word);
-}
-
-static void IndexFree(void*elemAddr){
-  indexData *data = elemAddr;
-  free(data->word);
-  VectorDispose(&data->data);
-}
-
-//main part but 2 more helper functions to create and fee all data structers
-static const int kNumStopWordsBuckets = 1009;
-static const int kNumIndexBuckets = 10007;
-void CreateDataStructure(rssFeedData* data){
-  
-  hashset stopWords;
-  HashSetNew(&stopWords,sizeof(char**),kNumStopWordsBuckets,StringHash, StringCmp,StringFree);  
-  memcpy(&data->stopWords,&stopWords,sizeof(hashset));
-
-  hashset articles;  //pointers to article and not articles to make it possible to reallocate data insside hashset without changing article pointers
-  HashSetNew(&articles,sizeof(articleData*),kNumStopWordsBuckets, ArticleHash, ArticleCmp,ArticleFree);
-  memcpy(&data->articles,&articles,sizeof(hashset));
-
-  hashset indices;  
-  HashSetNew(&indices,sizeof(indexData),kNumIndexBuckets,IndexHash,IndexCmp, IndexFree);
-  memcpy(&data->indices,&indices,sizeof(hashset));
-
-  memset(&data->item,0,sizeof(rssFeedItem));
-}
-
-void DisposeData(rssFeedData *data)
-{
-  HashSetDispose(&data->indices);
-  HashSetDispose(&data->stopWords);
-  HashSetDispose(&data->articles);  
-}
 
 /**
  * Function: main
@@ -220,6 +115,7 @@ int main(int argc, char **argv)
   LoadStopWords(kDefaultStopWordsURL,&data.stopWords);
   
   BuildIndices(feedsFileURL, &data);
+  // tests
   // HashSetMap(&data.stopWords, StringMap, NULL);
   // HashSetMap(&data.articles, ArticleMap, NULL);
   // HashSetMap(&data.indices, IndexMap, NULL);
@@ -228,6 +124,44 @@ int main(int argc, char **argv)
   
   DisposeData(&data);
   return 0;
+}
+
+/** 
+ * Function: CreateDataStructure
+ * -----------------
+ * Creates all data-holder hashsets 
+ */
+
+static const int kNumStopWordsBuckets = 1009;
+static const int kNumIndexBuckets = 10007;
+static void CreateDataStructure(rssFeedData* data){
+  
+  hashset stopWords;
+  HashSetNew(&stopWords,sizeof(char**),kNumStopWordsBuckets,StringHash, StringCmp,StringFree);  
+  memcpy(&data->stopWords,&stopWords,sizeof(hashset));
+
+  hashset articles;  //pointers to article and not articles to make it possible to reallocate data insside hashset without changing article pointers
+  HashSetNew(&articles,sizeof(articleData*),kNumStopWordsBuckets, ArticleHash, ArticleCmp,ArticleFree);
+  memcpy(&data->articles,&articles,sizeof(hashset));
+
+  hashset indices;  
+  HashSetNew(&indices,sizeof(indexData),kNumIndexBuckets,IndexHash,IndexCmp, IndexFree);
+  memcpy(&data->indices,&indices,sizeof(hashset));
+
+  memset(&data->item,0,sizeof(rssFeedItem));
+}
+
+/** 
+ * Function: DisposeData
+ * -----------------
+ * Disposes all data-holder hashsets 
+ */
+
+static void DisposeData(rssFeedData *data)
+{
+  HashSetDispose(&data->indices);
+  HashSetDispose(&data->stopWords);
+  HashSetDispose(&data->articles);  
 }
 
 /** 
@@ -275,7 +209,12 @@ static void Welcome(const char *welcomeTextURL)
   URLDispose(&u);
 }
 
-
+/**
+ * Function: LoadStopWords
+ * ---------------------
+ * Just loads all words from URL and adds them to stopWords hashset
+ *
+ */
 
 static void LoadStopWords(const char *StopWordsTextURL, hashset* stopWords)
 {  
@@ -595,55 +534,6 @@ static void ParseArticle(void *userData)
  * code that indexes the specified content.
  */
 
-
-static articleData* AddArticle(hashset *articles, rssFeedItem *item){
-  articleData article;
-  article.title = item->title;
-  article.url = item->url;
-  articleData* articleP = &article;
-  articleData** find = HashSetLookup(articles,&articleP);
-  
-  if(find==NULL){
-    articleData* newArticle = malloc(sizeof(articleData)); 
-    newArticle->title = strdup(item->title);
-    newArticle->url =  strdup(item->url);
-    HashSetEnter(articles,&newArticle);
-    return newArticle;
-  }else 
-    return *find;
-   
-}
-
-static indexData* addWordRecord(hashset *indices, char*someWord){
-  indexData index;
-  index.word = someWord;
-
-  indexData * find = HashSetLookup(indices,&index);
-  
-  if(find==NULL){
-    index.word = strdup(someWord);
-    VectorNew(&index.data,sizeof(wordCounter),NULL,1 );
-    HashSetEnter(indices,&index);
-    return HashSetLookup(indices,&index); 
-  }else 
-    return find;  
-}
-
-static void indexWord(vector *data,articleData *article){
-  wordCounter indexEntry;
-  indexEntry.article = article;
-  
-  int elemPosition = VectorSearch(data, &indexEntry,FindArticleRecordCmpFn, 0, false);
- 
-  if(elemPosition == -1){  
-    indexEntry.counter = 1;
-    VectorAppend(data,&indexEntry);
-  }else {
-    wordCounter* findRecord=VectorNth(data,elemPosition);
-    findRecord->counter++;
-  }	
-}
-
 static void ScanArticle(streamtokenizer *st, void* userData)
 {
   rssFeedData *data = userData;
@@ -678,6 +568,79 @@ static void ScanArticle(streamtokenizer *st, void* userData)
   if (strlen(longestWord) >= 15 && (strchr(longestWord, '-') == NULL)) 
     printf(" [Ooooo... long word!]");
   printf("\n");
+}
+
+/**
+ *  Function: AddArticle
+ *  ---------------------
+ *  Looks for article Data in articles HashSet.
+ *  If there is no such article in HashSet, 
+ *  creates articleData from rssFeedItem and adds it to articles HashSet
+ *  Returns article pointer in article Hashset
+ */
+
+static articleData* AddArticle(hashset *articles, rssFeedItem *item){
+  articleData article;
+  article.title = item->title;
+  article.url = item->url;
+  articleData* articleP = &article;
+  articleData** find = HashSetLookup(articles,&articleP);
+  
+  if(find==NULL){
+    articleData* newArticle = malloc(sizeof(articleData)); 
+    newArticle->title = strdup(item->title);
+    newArticle->url =  strdup(item->url);
+    HashSetEnter(articles,&newArticle);
+    return newArticle;
+  }else 
+    return *find;
+   
+}
+
+/**
+ * Function: AddWordRecord
+ * ---------------------
+ * Looks for word entry
+ * if entry not found, creates one and 
+ * returns word pointer in our indices Hashset
+ */
+
+static indexData* addWordRecord(hashset *indices, char*someWord){
+  indexData index;
+  index.word = someWord;
+
+  indexData * find = HashSetLookup(indices,&index);
+  
+  if(find==NULL){
+    index.word = strdup(someWord);
+    VectorNew(&index.data,sizeof(wordCounter),NULL,1 );
+    HashSetEnter(indices,&index);
+    return HashSetLookup(indices,&index); 
+  }else 
+    return find;  
+}
+
+/**
+ * Function: indexWord
+ * ---------------------
+ * Looks for current article index entry and
+ * if there is no entry, we create one
+ * but if there is, we just ++ entry index counter in currents Article wordCounter
+ */
+
+static void indexWord(vector *data,articleData *article){
+  wordCounter indexEntry;
+  indexEntry.article = article;
+  
+  int elemPosition = VectorSearch(data, &indexEntry,FindArticleRecordCmpFn, 0, false);
+ 
+  if(elemPosition == -1){  
+    indexEntry.counter = 1;
+    VectorAppend(data,&indexEntry);
+  }else {
+    wordCounter* findRecord=VectorNth(data,elemPosition);
+    findRecord->counter++;
+  }	
 }
 
 /** 
@@ -749,4 +712,113 @@ static bool WordIsWellFormed(const char *word)
     if (!isalnum((int) word[i]) && (word[i] != '-')) return false; 
 
   return true;
+}
+
+
+/**
+ * Helper functions of hashsets and vectors
+ * ---------------------
+ */
+
+//STRING HASHSET HELPER FUNCTIONS
+static const signed long kHashMultiplier = -1664117991L;
+static int StringHash(const void *elemAddr, int numBuckets){
+  char* s = *(char**)elemAddr;
+  unsigned long hashcode = 0;
+  for (int i = 0; i < strlen(s); i++)
+    hashcode = hashcode * kHashMultiplier + tolower(s[i]);
+  return hashcode % numBuckets;
+}
+
+static void StringMap(void*elemAddr,void*auxData){
+  printf(":: %s ",*(char**)elemAddr);
+}
+
+static int StringCmp(const void *one,const void *two){
+  return strcasecmp(*(char**)one,*(char**)two);
+}
+
+static void StringFree(void*elemAddr){
+  free(*(char**)elemAddr);
+}
+
+//ARTICLE HASHSET HELPER FUNCTIONS
+static void ArticleMap(void*elemAddr,void*auxData){
+  articleData *data = *(articleData**)elemAddr;  
+  printf("\narticle:: %s\n url:: %s", data->title, data->url);
+  fflush(stdout);
+}
+
+static int ArticleHash(const void *elemAddr, int numBuckets){
+  const articleData *data = *(articleData**)elemAddr;
+  char* title = data->title;
+  return StringHash(&title,numBuckets);
+}
+
+static int ArticleCmp(const void *oneP,const void *twoP){
+  const articleData* one = *(articleData**) oneP;
+  const articleData* two = *(articleData**)twoP; 
+  
+  if(strcasecmp(one->url,two->url)==0 || strcasecmp(one->title,two->title) == 0) 
+    return 0;
+  else
+    return strcasecmp(one->url,two->url);  
+}
+
+static void ArticleFree(void*elemAddr){
+  articleData* data = *(articleData**)elemAddr;
+  free(data->title);
+  free(data->url);
+  free(data);
+}
+
+//WORDCOUNTER VECTOR HEALPER FUNCTIONS
+static int SortVectorCmpFn(const void *one,const void *two){
+  const wordCounter* first = one;
+  const wordCounter* second = two;
+  if(first->counter>second->counter)
+    return -1;
+  else if(first->counter< second-> counter)
+    return 1;
+  else 
+    return 0;
+}
+
+static int FindArticleRecordCmpFn(const void *oneP,const void *twoP){
+  const wordCounter* one = oneP;
+  const wordCounter* two = twoP;
+  return ArticleCmp(&one->article,&two->article);
+}
+
+static void PrintResultsMapFn(void*elemAddr,void*auxData){
+  wordCounter *data = elemAddr;
+  printf("\n %d)\t Article:: %s Count:: %d", (*(int*)auxData)++, data->article->title, data->counter); 
+  fflush(stdout);
+}
+//no free function for vector because it has only int and *articles, that will be freed by articles hashset
+
+//INDEX HASHSET HELPER FUNCTIONS
+static void IndexMap(void*elemAddr,void*auxData){
+  indexData *data = elemAddr;  
+  printf("\n word:::::::::::::::::::%s:::::::::::::::::::::::::::::::: ",  data->word);
+  fflush(stdout);
+  int i=0;  
+  VectorMap(&data->data,PrintResultsMapFn,&i);
+}
+
+static int IndexHash(const void *elemAddr, int numBuckets){
+  const indexData *data = elemAddr;
+  return StringHash(&data->word,numBuckets);
+}
+
+static int IndexCmp(const void *oneP,const void *twoP){
+  const indexData* one = oneP;
+  const indexData* two = twoP;
+  return strcasecmp(one->word,two->word);
+}
+
+static void IndexFree(void*elemAddr){
+  indexData *data = elemAddr;
+  free(data->word);
+  VectorDispose(&data->data);
 }

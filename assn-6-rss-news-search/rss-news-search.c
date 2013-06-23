@@ -13,10 +13,9 @@
 #include "vector.h"
 #include "hashset.h"
 
-#include "pthread.h"
+#include "pthread.h" //#include "thread_107.h"
 #include "semaphore.h"
 
-//#include "thread_107.h"
 typedef struct{
   pthread_mutex_t indicesHashSetLock; 
   pthread_mutex_t articlesVectorLock; 
@@ -60,8 +59,25 @@ typedef struct {
   int articleIndex;
   int freq;
 } rssRelevantArticleEntry;
+
+// Next 3 are thread parametrs and thread storing structs
+typedef struct {
+  rssDatabase *db;
+  char *title;
+  char *URL;
+}threadArguments;
+
+typedef struct {
+  pthread_t threadID;
+  threadArguments *arg;//could use rssFeedState, but it's kinda nasty;p
+}threadData;
+
+typedef struct{
+  const char *url;
+  sem_t *serverLock;
+}serverLockData;
+
 static void Welcome(const char *welcomeTextURL);
-//static void Welcome(const char *welcomeTextURL);
 static void LoadStopWords(hashset *stopWords, const char *stopWordsURL);
 static void BuildIndices(rssDatabase *db, const char *feedsFileName);
 static void ProcessFeed(rssDatabase *db, const char *remoteDocumentName);
@@ -71,9 +87,8 @@ static void ProcessStartTag(void *userData, const char *name, const char **atts)
 static void ProcessEndTag(void *userData, const char *name);
 static void ProcessTextData(void *userData, const char *text, int len);
 
-
-static void*PthreadParseArticle(void * threadData);
-static void NewThreadArticleParse(rssDatabase *db, const char *articleTitle, const char *articleURL);
+static void NewThreadParseArticle(rssDatabase *db, const char *articleTitle, const char *articleURL);
+static void* PthreadParseArticle(void * threadData);
 static void ParseArticle(rssDatabase *db, const char *articleTitle, const char *articleURL);
 
 static void ScanArticle(streamtokenizer *st, int articleID, hashset *indices, hashset *stopWords, 
@@ -101,6 +116,16 @@ static void IndexEntryFree(void *elem);
 static int ArticleIndexCompare(const void *elem1, const void *elem2);
 static int ArticleFrequencyCompare(const void *elem1, const void *elem2);
 
+static void ThreadDataFree(void *elem);
+static int ConnectionsLockHash(const void* elemAddr, int numBuckets);
+static int ConnectionsLockCompare(const void* elemAddr1, const void* elemAddr2);
+static void ConnectionsLockFree(void* elemAddr);
+static void initThreadsData(rssDatabase *db);
+static void cleanThreadData(rssDatabase *db);
+static void unlockConnection(rssDatabase *db, const char* serverURL);
+static void lockConnection(rssDatabase *db, const char* serverURL);
+static sem_t* findServerLock(hashset *serverLocks, pthread_mutex_t *dataLock, const char* serverURL);
+
 /**
  * Function: main
  * --------------
@@ -116,77 +141,7 @@ static int ArticleFrequencyCompare(const void *elem1, const void *elem2);
  * @return always 0 if it main returns normally (although there might be exit(n) calls
  *         within the code base that end the program abnormally)
  */
-//static const char *const kWelcomeTextURL ="http://varren.site44.com/welcome.txt";
-//static const char *const kDefaultStopWordsURL = "http://varren.site44.com/stop-words.txt";
-//static const char *const kDefaultFeedsFileURL = "http://varren.site44.com/rss-feeds.txt";
-typedef struct {
-  rssDatabase *db;
-  char *title;
-  char *URL;
-}threadArguments;
 
-typedef struct {
-  pthread_t threadID;
-  threadArguments *arg;//could use rssFeedState, but it's kinda nasty;p
-}threadData;
-
-typedef struct{
-  const char *url;
-  sem_t *serverLock;
-}serverLockData;
-
-static void ThreadDataFree(void *elem){
-  threadData* data = elem;
-  pthread_join(data->threadID,NULL);
-  threadArguments* arg =data->arg;
-  StringFree(&arg->title);
-  StringFree(&arg->URL);
-  free(data->arg);
-}
-
-static int ConnectionsLockHash(const void* elemAddr, int numBuckets){
-  const serverLockData *entry = elemAddr;
-  return StringHash(&entry->url, numBuckets);
-
-}
-static int ConnectionsLockCompare(const void* elemAddr1, const void* elemAddr2){
-  const serverLockData * one = elemAddr1;
-  const serverLockData * two = elemAddr2;
-  return StringCompare(&one->url,&two->url);
-}
-static void ConnectionsLockFree(void* elemAddr){
-  serverLockData * data = elemAddr;
-  StringFree(&data->url);
-  sem_destroy(data->serverLock);
-  free(data->serverLock);
-}
-static const int kNumOfServersBuckets = 1007;
-static const int kNumOfConnections = 20;
-static void initThreadsData(rssDatabase *db)
-{
-  VectorNew(&db->threads, sizeof(threadData),ThreadDataFree,0);
-  HashSetNew(&(db->locks.limitConnToServerLock),sizeof(serverLockData),kNumOfServersBuckets, 
-	     ConnectionsLockHash, ConnectionsLockCompare,ConnectionsLockFree);
-  
-  pthread_mutex_init(&(db->locks.serverDataLock), NULL);  
-  pthread_mutex_init(&(db->locks.articlesVectorLock), NULL);
-  pthread_mutex_init(&(db->locks.indicesHashSetLock), NULL);
-  pthread_mutex_init(&(db->locks.stopWordsHashSetLock), NULL);
-  sem_init(&(db->locks.connectionsLock),0,kNumOfConnections);
-  
-}
-void cleanThreadData(rssDatabase *db) 
-{
-  VectorDispose(&db->threads); //shall be first becouse it executes pthread_join(); 
-  HashSetDispose(&(db->locks.limitConnToServerLock));
-
-  pthread_mutex_destroy(&(db->locks.serverDataLock));  
-  pthread_mutex_destroy(&(db->locks.articlesVectorLock));
-  pthread_mutex_destroy(&(db->locks.indicesHashSetLock));
-  pthread_mutex_destroy(&(db->locks.stopWordsHashSetLock));
-  sem_destroy(&(db->locks.connectionsLock));
-  
-}
 static const char *const kWelcomeTextFile = "http://varren.site44.com/welcome.txt";
 static const char *const kDefaultStopWordsFile = "http://varren.site44.com/stop-words.txt";
 static const char *const kDefaultFeedsFile = "http://varren.site44.com/rss-feeds.txt";
@@ -510,7 +465,7 @@ static void ProcessEndTag(void *userData, const char *name)
   rssFeedEntry *entry = &state->entry;
   entry->activeField = NULL;
   if (strcasecmp(name, "item") == 0) {
-    NewThreadArticleParse(state->db, entry->title, entry->url);
+    NewThreadParseArticle(state->db, entry->title, entry->url);
     //ParseArticle(state->db, entry->title, entry->url); //OLD style
   }
 }
@@ -547,6 +502,46 @@ static void ProcessTextData(void *userData, const char *text, int len)
   strncat(entry->activeField, buffer, 2048);
 }
 
+/**
+ * Function: NewThreadParseArticle
+ * ----------------------
+ * Wrapper function to keep previous functions structure and create threads here
+ */
+
+static void NewThreadParseArticle(rssDatabase *db, const char *articleTitle, const char *articleURL){
+    
+  threadData newThreadData;  
+  newThreadData.arg = malloc(sizeof(threadArguments));
+  newThreadData.arg->db = db;
+  newThreadData.arg->title = strdup(articleTitle);
+  newThreadData.arg->URL = strdup(articleURL);
+  
+  int tID = VectorLength(&db->threads);
+  
+  VectorAppend(&db->threads, &newThreadData);
+  threadData *threadP = VectorNth(&db->threads, tID);
+ 
+ if(pthread_create(&threadP->threadID,NULL, PthreadParseArticle,(void *)threadP->arg)!=0){
+    printf("Error, thread cannot be created");
+    fflush(stdout);
+  }
+  
+}
+
+/**
+ * Function: PthreadParseArticle
+ * ----------------------
+ * Function to path to pthread_create in pthread lib 
+ */
+
+static void* PthreadParseArticle(void * threadData){
+  threadArguments *arg = threadData;
+
+  ParseArticle(arg->db ,arg->title,arg->URL);
+  
+  pthread_exit(NULL);
+}
+
 /** 
  * Function: ParseArticle
  * ----------------------
@@ -575,69 +570,6 @@ static void ProcessTextData(void *userData, const char *text, int len)
  *
  * No return value.
  */
-static void NewThreadArticleParse(rssDatabase *db, const char *articleTitle, const char *articleURL){
-    
-  threadData newThreadData;  
-  newThreadData.arg = malloc(sizeof(threadArguments));
-  newThreadData.arg->db = db;
-  newThreadData.arg->title = strdup(articleTitle);
-  newThreadData.arg->URL = strdup(articleURL);
-  
-  int tID = VectorLength(&db->threads);
-  
-  VectorAppend(&db->threads, &newThreadData);
-  threadData *threadP = VectorNth(&db->threads, tID);
- 
- if(pthread_create(&threadP->threadID,NULL, PthreadParseArticle,(void *)threadP->arg)!=0){
-    printf("Error, thread cannot be created");
-    fflush(stdout);
-  }
-  
-}
-static void* PthreadParseArticle(void * threadData){
-  threadArguments *arg = threadData;
-
-  ParseArticle(arg->db ,arg->title,arg->URL);
-  
-  pthread_exit(NULL);
-}
-
-static const int kSimultaneousServerConn = 6;
-static sem_t* findServerLock(hashset *serverLocks, pthread_mutex_t *dataLock, const char* serverURL){
- 
-  pthread_mutex_lock(dataLock);
-  sem_t * serverLock;
-  serverLockData newLockData = {serverURL}; 
-  serverLockData* lockDataP = HashSetLookup(serverLocks, &newLockData);
-  
-  if(lockDataP==NULL){
-
-    newLockData.url = strdup(serverURL);
-    newLockData.serverLock = malloc(sizeof(sem_t));
-    sem_init(newLockData.serverLock,0,kSimultaneousServerConn);
-
-    HashSetEnter(serverLocks, &newLockData);
-    lockDataP = HashSetLookup(serverLocks, &newLockData);
-    //create semaphore
-  }
-  serverLock = lockDataP->serverLock;
-  
-  pthread_mutex_unlock(dataLock);
-  return serverLock;
-}
-static void lockConnection(rssDatabase *db, const char* serverURL){
-  sem_t *conCounter = &(db->locks.connectionsLock);
-  sem_t *serverLock =  findServerLock(&(db->locks.limitConnToServerLock),&(db->locks.serverDataLock),serverURL);
-  sem_wait(conCounter);
-  sem_wait(serverLock);
-}
-
-static void unlockConnection(rssDatabase *db, const char* serverURL){
-  sem_t *conCounter = &(db->locks.connectionsLock);  
-  sem_t *serverLock =  findServerLock(&(db->locks.limitConnToServerLock),&(db->locks.serverDataLock),serverURL);
-  sem_post(conCounter);  
-  sem_post(serverLock);
-}
 
 static const char *const kTextDelimiters = " \t\n\r\b!@$%^*()_+={[}]|\\'\":;/?.>,<~`";
 static void ParseArticle(rssDatabase *db, const char *articleTitle, const char *articleURL)
@@ -1151,4 +1083,97 @@ static int ArticleFrequencyCompare(const void *elem1, const void *elem2)
   const rssRelevantArticleEntry *entry1 = elem1;
   const rssRelevantArticleEntry *entry2 = elem2;
   return entry2->freq - entry1->freq;
+}
+
+
+static void ThreadDataFree(void *elem){
+  threadData* data = elem;
+  pthread_join(data->threadID,NULL);
+  threadArguments* arg =data->arg;
+  StringFree(&arg->title);
+  StringFree(&arg->URL);
+  free(data->arg);
+}
+
+static int ConnectionsLockHash(const void* elemAddr, int numBuckets){
+  const serverLockData *entry = elemAddr;
+  return StringHash(&entry->url, numBuckets);
+
+}
+static int ConnectionsLockCompare(const void* elemAddr1, const void* elemAddr2){
+  const serverLockData * one = elemAddr1;
+  const serverLockData * two = elemAddr2;
+  return StringCompare(&one->url,&two->url);
+}
+static void ConnectionsLockFree(void* elemAddr){
+  serverLockData * data = elemAddr;
+  StringFree(&data->url);
+  sem_destroy(data->serverLock);
+  free(data->serverLock);
+}
+
+
+
+static const int kNumOfServersBuckets = 1007;
+static const int kNumOfConnections = 20;
+static void initThreadsData(rssDatabase *db)
+{
+  VectorNew(&db->threads, sizeof(threadData),ThreadDataFree,0);
+  HashSetNew(&(db->locks.limitConnToServerLock),sizeof(serverLockData),kNumOfServersBuckets, 
+	     ConnectionsLockHash, ConnectionsLockCompare,ConnectionsLockFree);
+  
+  pthread_mutex_init(&(db->locks.serverDataLock), NULL);  
+  pthread_mutex_init(&(db->locks.articlesVectorLock), NULL);
+  pthread_mutex_init(&(db->locks.indicesHashSetLock), NULL);
+  pthread_mutex_init(&(db->locks.stopWordsHashSetLock), NULL);
+  sem_init(&(db->locks.connectionsLock),0,kNumOfConnections);
+  
+}
+static void cleanThreadData(rssDatabase *db) 
+{
+  VectorDispose(&db->threads); //shall be first becouse it executes pthread_join(); 
+  HashSetDispose(&(db->locks.limitConnToServerLock));
+
+  pthread_mutex_destroy(&(db->locks.serverDataLock));  
+  pthread_mutex_destroy(&(db->locks.articlesVectorLock));
+  pthread_mutex_destroy(&(db->locks.indicesHashSetLock));
+  pthread_mutex_destroy(&(db->locks.stopWordsHashSetLock));
+  sem_destroy(&(db->locks.connectionsLock));
+  
+}
+static const int kSimultaneousServerConn = 6;
+static sem_t* findServerLock(hashset *serverLocks, pthread_mutex_t *dataLock, const char* serverURL){
+ 
+  pthread_mutex_lock(dataLock);
+  sem_t * serverLock;
+  serverLockData newLockData = {serverURL}; 
+  serverLockData* lockDataP = HashSetLookup(serverLocks, &newLockData);
+  
+  if(lockDataP==NULL){
+
+    newLockData.url = strdup(serverURL);
+    newLockData.serverLock = malloc(sizeof(sem_t));
+    sem_init(newLockData.serverLock,0,kSimultaneousServerConn);
+
+    HashSetEnter(serverLocks, &newLockData);
+    lockDataP = HashSetLookup(serverLocks, &newLockData);
+    //create semaphore
+  }
+  serverLock = lockDataP->serverLock;
+  
+  pthread_mutex_unlock(dataLock);
+  return serverLock;
+}
+static void lockConnection(rssDatabase *db, const char* serverURL){
+  sem_t *conCounter = &(db->locks.connectionsLock);
+  sem_t *serverLock =  findServerLock(&(db->locks.limitConnToServerLock),&(db->locks.serverDataLock),serverURL);
+  sem_wait(conCounter);
+  sem_wait(serverLock);
+}
+
+static void unlockConnection(rssDatabase *db, const char* serverURL){
+  sem_t *conCounter = &(db->locks.connectionsLock);  
+  sem_t *serverLock =  findServerLock(&(db->locks.limitConnToServerLock),&(db->locks.serverDataLock),serverURL);
+  sem_post(conCounter);  
+  sem_post(serverLock);
 }
